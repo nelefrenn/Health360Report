@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Habilita CORS para evitar bloqueos de GitHub Pages
+CORS(app)  # Habilita CORS para permitir peticiones desde GitHub Pages
 
 # Diccionario con códigos de los países según la API del Banco Mundial
 PAISES_CODIGOS = {
@@ -20,95 +21,94 @@ PAISES_CODIGOS = {
     "Arabia Saudita": "SAU"
 }
 
-# Diccionario con indicadores de salud y sus explicaciones
+# Diccionario con indicadores de salud y su descripción
 INDICADORES = {
     "Accesibilidad y Cobertura del Sistema de Salud": {
         "codigo": "SH.UHC.SRVS.CV.XD",
-        "explicacion": "Porcentaje de la población con acceso a servicios esenciales de salud."
+        "descripcion": "Mide el acceso a servicios esenciales de salud y cobertura universal."
     },
     "Financiamiento y Gasto en Salud": {
         "codigo": "SH.XPD.CHEX.GD.ZS",
-        "explicacion": "Porcentaje del PIB destinado al gasto en salud."
+        "descripcion": "Porcentaje del PIB que se gasta en salud en cada país."
     },
     "Calidad de la Atención Médica": {
         "codigo": "SH.STA.BRTC.ZS",
-        "explicacion": "Tasa de mortalidad materna por cada 100,000 nacimientos."
+        "descripcion": "Mortalidad materna y atención a nacimientos por personal capacitado."
     },
     "Resultados en Salud": {
         "codigo": "SP.DYN.LE00.IN",
-        "explicacion": "Esperanza de vida al nacer en años."
+        "descripcion": "Esperanza de vida al nacer."
     },
     "Sostenibilidad y Eficiencia del Sistema": {
         "codigo": "SH.MED.BEDS.ZS",
-        "explicacion": "Número de camas hospitalarias por cada 1,000 habitantes."
+        "descripcion": "Número de camas de hospital por cada 1,000 habitantes."
     },
     "Innovación y Desarrollo Tecnológico": {
         "codigo": "IT.NET.USER.ZS",
-        "explicacion": "Porcentaje de la población con acceso a Internet."
+        "descripcion": "Porcentaje de la población que usa internet, como indicador de acceso a tecnología."
     },
     "Regulación y Gobernanza del Sistema": {
         "codigo": "SH.ANM.ALL.ZS",
-        "explicacion": "Cobertura de vacunación en niños menores de un año."
+        "descripcion": "Cobertura de inmunización contra enfermedades clave en la infancia."
     }
 }
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
     pais = request.args.get('pais')
-    comparar = request.args.get('comparar')  # País opcional para comparación
+    comparar = request.args.get('comparar')
     criterio = request.args.get('criterio')
 
     if not pais or not criterio:
         return jsonify({"error": "Faltan parámetros"}), 400
 
     pais_codigo = PAISES_CODIGOS.get(pais)
-    indicador = INDICADORES.get(criterio)
+    indicador_info = INDICADORES.get(criterio)
 
-    if not pais_codigo or not indicador:
+    if not pais_codigo or not indicador_info:
         return jsonify({"error": "País o criterio no válido"}), 400
 
-    url = f"https://api.worldbank.org/v2/country/{pais_codigo}/indicator/{indicador['codigo']}?format=json"
+    indicador_codigo = indicador_info["codigo"]
+    descripcion = indicador_info["descripcion"]
+    fuente = "Banco Mundial"
+    fecha_consulta = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    url = f"https://api.worldbank.org/v2/country/{pais_codigo}/indicator/{indicador_codigo}?format=json"
 
     response = requests.get(url)
     data = response.json()
 
-    resultado = "Datos no disponibles"
-    fecha = "N/A"
-
     if len(data) > 1 and isinstance(data[1], list) and len(data[1]) > 0:
         ultimo_dato = next((x for x in data[1] if x.get("value") is not None), None)
-        if ultimo_dato:
-            resultado = ultimo_dato["value"]
-            fecha = ultimo_dato["date"]
+        resultado = ultimo_dato["value"] if ultimo_dato else "Datos no disponibles"
+    else:
+        resultado = "Datos no disponibles"
 
     resultado_comparar = None
-    fecha_comparar = "N/A"
-
     if comparar:
         pais_codigo_comparar = PAISES_CODIGOS.get(comparar)
         if not pais_codigo_comparar or pais_codigo_comparar == pais_codigo:
             return jsonify({"error": "País inválido para comparar"}), 400
 
-        url_comparar = f"https://api.worldbank.org/v2/country/{pais_codigo_comparar}/indicator/{indicador['codigo']}?format=json"
+        url_comparar = f"https://api.worldbank.org/v2/country/{pais_codigo_comparar}/indicator/{indicador_codigo}?format=json"
         response_comparar = requests.get(url_comparar)
         data_comparar = response_comparar.json()
 
         if len(data_comparar) > 1 and isinstance(data_comparar[1], list) and len(data_comparar[1]) > 0:
             ultimo_dato_comparar = next((x for x in data_comparar[1] if x.get("value") is not None), None)
-            if ultimo_dato_comparar:
-                resultado_comparar = ultimo_dato_comparar["value"]
-                fecha_comparar = ultimo_dato_comparar["date"]
+            resultado_comparar = ultimo_dato_comparar["value"] if ultimo_dato_comparar else "Datos no disponibles"
+        else:
+            resultado_comparar = "Datos no disponibles"
 
     return jsonify({
         "pais": pais,
         "criterio": criterio,
+        "descripcion": descripcion,
         "valor": resultado,
-        "fecha": fecha,
-        "explicacion": indicador["explicacion"],
-        "fuente": "Banco Mundial",
+        "fuente": fuente,
+        "fecha": fecha_consulta,
         "comparar": comparar if comparar else None,
-        "valor_comparar": resultado_comparar if comparar else None,
-        "fecha_comparar": fecha_comparar if comparar else None
+        "valor_comparar": resultado_comparar if comparar else None
     })
 
 if __name__ == '__main__':
