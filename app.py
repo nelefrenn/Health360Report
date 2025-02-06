@@ -6,7 +6,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para evitar bloqueos
 
-# Códigos de países
+# Lista de países con sus códigos en la API del Banco Mundial
 PAISES_CODIGOS = {
     "Colombia": "COL",
     "Estados Unidos": "USA",
@@ -21,7 +21,7 @@ PAISES_CODIGOS = {
     "Arabia Saudita": "SAU"
 }
 
-# Indicadores con descripción
+# Lista de criterios con sus códigos en la API del Banco Mundial
 INDICADORES = {
     "Accesibilidad y Cobertura del Sistema de Salud": {
         "codigo": "SH.UHC.SRVS.CV.XD",
@@ -30,6 +30,26 @@ INDICADORES = {
     "Financiamiento y Gasto en Salud": {
         "codigo": "SH.XPD.CHEX.GD.ZS",
         "descripcion": "Porcentaje del PIB que se gasta en salud en cada país."
+    },
+    "Calidad de la Atención Médica": {
+        "codigo": "SH.STA.BRTC.ZS",
+        "descripcion": "Mortalidad materna y atención a nacimientos por personal capacitado."
+    },
+    "Resultados en Salud": {
+        "codigo": "SP.DYN.LE00.IN",
+        "descripcion": "Esperanza de vida al nacer."
+    },
+    "Sostenibilidad y Eficiencia del Sistema": {
+        "codigo": "SH.MED.BEDS.ZS",
+        "descripcion": "Número de camas de hospital por cada 1,000 habitantes."
+    },
+    "Innovación y Desarrollo Tecnológico": {
+        "codigo": "IT.NET.USER.ZS",
+        "descripcion": "Porcentaje de la población que usa internet, como indicador de acceso a tecnología."
+    },
+    "Regulación y Gobernanza del Sistema": {
+        "codigo": "SH.ANM.ALL.ZS",
+        "descripcion": "Cobertura de inmunización contra enfermedades clave en la infancia."
     }
 }
 
@@ -92,6 +112,7 @@ def get_data():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
