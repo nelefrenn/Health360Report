@@ -4,7 +4,7 @@ import requests
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Habilita CORS para permitir peticiones desde GitHub Pages
+CORS(app)  # Habilita CORS para evitar bloqueos en GitHub Pages
 
 # Diccionario con códigos de los países según la API del Banco Mundial
 PAISES_CODIGOS = {
@@ -78,27 +78,22 @@ def get_data():
     response = requests.get(url)
     data = response.json()
 
+    resultado = "Datos no disponibles"
     if len(data) > 1 and isinstance(data[1], list) and len(data[1]) > 0:
         ultimo_dato = next((x for x in data[1] if x.get("value") is not None), None)
         resultado = ultimo_dato["value"] if ultimo_dato else "Datos no disponibles"
-    else:
-        resultado = "Datos no disponibles"
 
-    resultado_comparar = None
+    resultado_comparar = "Datos no disponibles"
     if comparar:
         pais_codigo_comparar = PAISES_CODIGOS.get(comparar)
-        if not pais_codigo_comparar or pais_codigo_comparar == pais_codigo:
-            return jsonify({"error": "País inválido para comparar"}), 400
+        if pais_codigo_comparar and pais_codigo_comparar != pais_codigo:
+            url_comparar = f"https://api.worldbank.org/v2/country/{pais_codigo_comparar}/indicator/{indicador_codigo}?format=json"
+            response_comparar = requests.get(url_comparar)
+            data_comparar = response_comparar.json()
 
-        url_comparar = f"https://api.worldbank.org/v2/country/{pais_codigo_comparar}/indicator/{indicador_codigo}?format=json"
-        response_comparar = requests.get(url_comparar)
-        data_comparar = response_comparar.json()
-
-        if len(data_comparar) > 1 and isinstance(data_comparar[1], list) and len(data_comparar[1]) > 0:
-            ultimo_dato_comparar = next((x for x in data_comparar[1] if x.get("value") is not None), None)
-            resultado_comparar = ultimo_dato_comparar["value"] if ultimo_dato_comparar else "Datos no disponibles"
-        else:
-            resultado_comparar = "Datos no disponibles"
+            if len(data_comparar) > 1 and isinstance(data_comparar[1], list) and len(data_comparar[1]) > 0:
+                ultimo_dato_comparar = next((x for x in data_comparar[1] if x.get("value") is not None), None)
+                resultado_comparar = ultimo_dato_comparar["value"] if ultimo_dato_comparar else "Datos no disponibles"
 
     return jsonify({
         "pais": pais,
