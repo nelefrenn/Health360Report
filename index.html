@@ -27,6 +27,9 @@
 
                 const data = await response.json();
 
+                let valor = data.valor ? data.valor : "No disponible";
+                let valor_comparar = data.valor_comparar ? data.valor_comparar : "No disponible";
+
                 let tabla = `<table>
                     <thead>
                         <tr>
@@ -43,7 +46,7 @@
                             <td>${data.pais}</td>
                             <td>${data.criterio}</td>
                             <td>${data.descripcion}</td>
-                            <td>${data.valor !== null ? data.valor : "No disponible"}</td>
+                            <td>${valor}</td>
                             <td>${data.fuente}</td>
                             <td>${data.fecha}</td>
                         </tr>`;
@@ -53,7 +56,7 @@
                         <td>${data.comparar}</td>
                         <td>${data.criterio}</td>
                         <td>${data.descripcion}</td>
-                        <td>${data.valor_comparar !== null ? data.valor_comparar : "No disponible"}</td>
+                        <td>${valor_comparar}</td>
                         <td>${data.fuente}</td>
                         <td>${data.fecha}</td>
                     </tr>`;
@@ -69,13 +72,11 @@
     </script>
 </head>
 <body>
-    <main class="container">
-        <h1>Salud360 Report</h1>
-        <button onclick="fetchData()">Buscar</button>
-        <div id="tabla_resultado"></div>
-    </main>
+    <button onclick="fetchData()">Buscar</button>
+    <div id="tabla_resultado"></div>
 </body>
 </html>
+
 
 
 
