@@ -27,8 +27,8 @@
 
                 const data = await response.json();
 
-                let valor = data.valor ? data.valor : "No disponible";
-                let valor_comparar = data.valor_comparar ? data.valor_comparar : "No disponible";
+                let valor = data.valor !== null ? data.valor : "No disponible";
+                let valor_comparar = data.valor_comparar !== null ? data.valor_comparar : "No disponible";
 
                 let tabla = `<table>
                     <thead>
@@ -72,10 +72,33 @@
     </script>
 </head>
 <body>
-    <button onclick="fetchData()">Buscar</button>
-    <div id="tabla_resultado"></div>
+    <main class="container">
+        <h1>Salud360 Report</h1>
+        <label>Selecciona un país:</label>
+        <select id="pais">
+            <option>Colombia</option>
+            <option>Estados Unidos</option>
+        </select>
+
+        <label><input type="checkbox" id="comparar"> Comparar</label>
+        <select id="pais_comparar">
+            <option>Colombia</option>
+            <option>Estados Unidos</option>
+        </select>
+
+        <label>Selecciona un criterio:</label>
+        <select id="criterio">
+            <option>Accesibilidad y Cobertura del Sistema de Salud</option>
+            <option>Financiamiento y Gasto en Salud</option>
+        </select>
+
+        <button onclick="fetchData()">Buscar</button>
+
+        <div id="tabla_resultado"></div>
+    </main>
 </body>
 </html>
+
 
 
 
