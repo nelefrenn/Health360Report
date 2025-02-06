@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Salud360 Report</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <script>
+        async function fetchData() {
+            const pais = document.getElementById("pais").value;
+            const comparar = document.getElementById("comparar").checked ? document.getElementById("pais_comparar").value : "";
+            const criterio = document.getElementById("criterio").value;
+
+            if (!pais || !criterio) {
+                alert("Seleccione un país y un criterio.");
+                return;
+            }
+
+            let url = `https://tu-api-en-render.onrender.com/get_data?pais=${pais}&criterio=${criterio}`;
+            if (comparar) {
+                url += `&comparar=${comparar}`;
+            }
+
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            let tabla = `<table><thead><tr><th>País</th><th>Criterio</th><th>Valor</th></tr></thead><tbody>`;
+            tabla += `<tr><td>${data.pais}</td><td>${data.criterio}</td><td>${data.valor}</td></tr>`;
+
+            if (comparar) {
+                tabla += `<tr><td>${data.comparar}</td><td>${data.criterio}</td><td>${data.valor_comparar}</td></tr>`;
+            }
+
+            tabla += "</tbody></table>";
+            document.getElementById("tabla_resultado").innerHTML = tabla;
+        }
+
+        function cambiarIdioma() {
+            const idioma = document.getElementById("idioma").value;
+            if (idioma === "en") {
+                document.getElementById("titulo").innerText = "Health360 Report";
+                document.getElementById("label_pais").innerText = "Select a country:";
+                document.getElementById("label_criterio").innerText = "Select a criterion:";
+                document.getElementById("btn_buscar").innerText = "Search";
+            } else {
+                document.getElementById("titulo").innerText = "Salud360 Report";
+                document.getElementById("label_pais").innerText = "Selecciona un país:";
+                document.getElementById("label_criterio").innerText = "Selecciona un criterio:";
+                document.getElementById("btn_buscar").innerText = "Buscar";
+            }
+        }
+    </script>
+</head>
+<body>
+    <main class="container">
+        <h1 id="titulo">Salud360 Report</h1>
+
+        <label>Selecciona un idioma:</label>
+        <select id="idioma" onchange="cambiarIdioma()">
+            <option value="es">Español</option>
+            <option value="en">Inglés</option>
+        </select>
+
+        <label id="label_pais">Selecciona un país:</label>
+        <select id="pais">
+            <option>Colombia</option>
+            <option>Estados Unidos</option>
+            <option>Venezuela</option>
+            <option>México</option>
+            <option>Perú</option>
+            <option>Brasil</option>
+            <option>España</option>
+            <option>Puerto Rico</option>
+            <option>República Dominicana</option>
+            <option>Filipinas</option>
+            <option>Arabia Saudita</option>
+        </select>
+
+        <label><input type="checkbox" id="comparar"> Comparar</label>
+        <select id="pais_comparar">
+            <option>Colombia</option>
+            <option>Estados Unidos</option>
+            <option>Venezuela</option>
+            <option>México</option>
+            <option>Perú</option>
+            <option>Brasil</option>
+            <option>España</option>
+            <option>Puerto Rico</option>
+            <option>República Dominicana</option>
+            <option>Filipinas</option>
+            <option>Arabia Saudita</option>
+        </select>
+
+        <label id="label_criterio">Selecciona un criterio:</label>
+        <select id="criterio">
+            <option>Accesibilidad y Cobertura del Sistema de Salud</option>
+            <option>Financiamiento y Gasto en Salud</option>
+            <option>Calidad de la Atención Médica</option>
+            <option>Resultados en Salud</option>
+            <option>Sostenibilidad y Eficiencia del Sistema</option>
+            <option>Innovación y Desarrollo Tecnológico</option>
+            <option>Regulación y Gobernanza del Sistema</option>
+        </select>
+
+        <button id="btn_buscar" onclick="fetchData()">Buscar</button>
+
+        <div id="tabla_resultado"></div>
+    </main>
+</body>
+</html>
