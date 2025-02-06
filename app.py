@@ -1,7 +1,14 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
+
+# Habilitar CORS para permitir solicitudes desde cualquier origen
+CORS(app)
+
+# Si quieres permitir solo GitHub Pages y mayor seguridad, usa esto:
+# CORS(app, origins=["https://nelefrenn.github.io"])
 
 # Diccionario con códigos de los países según la API del Banco Mundial
 PAISES_CODIGOS = {
@@ -35,7 +42,7 @@ def get_data():
     comparar = request.args.get('comparar')  # País opcional para comparación
     criterio = request.args.get('criterio')
 
-    if not pais or criterio not in INDICADORES:
+    if not pais or not criterio:  
         return jsonify({"error": "Faltan parámetros"}), 400
 
     pais_codigo = PAISES_CODIGOS.get(pais)
@@ -43,7 +50,10 @@ def get_data():
         return jsonify({"error": "País no válido"}), 400
 
     # URL para la API del Banco Mundial
-    indicador_codigo = INDICADORES[criterio]
+    indicador_codigo = INDICADORES.get(criterio)
+    if not indicador_codigo:
+        return jsonify({"error": "Criterio no válido"}), 400
+
     url = f"https://api.worldbank.org/v2/country/{pais_codigo}/indicator/{indicador_codigo}?format=json"
 
     response = requests.get(url)
@@ -84,3 +94,4 @@ def get_data():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
