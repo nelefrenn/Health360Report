@@ -3,12 +3,7 @@ from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
-
-# Habilitar CORS para permitir solicitudes desde cualquier origen
-CORS(app)
-
-# Si quieres permitir solo GitHub Pages y mayor seguridad, usa esto:
-# CORS(app, origins=["https://nelefrenn.github.io"])
+CORS(app)  # Habilitar CORS para evitar bloqueos de GitHub Pages
 
 # Diccionario con códigos de los países según la API del Banco Mundial
 PAISES_CODIGOS = {
@@ -39,59 +34,36 @@ INDICADORES = {
 @app.route('/get_data', methods=['GET'])
 def get_data():
     pais = request.args.get('pais')
-    comparar = request.args.get('comparar')  # País opcional para comparación
     criterio = request.args.get('criterio')
 
-    if not pais or not criterio:  
+    if not pais or not criterio:
         return jsonify({"error": "Faltan parámetros"}), 400
 
     pais_codigo = PAISES_CODIGOS.get(pais)
-    if not pais_codigo:
-        return jsonify({"error": "País no válido"}), 400
-
-    # URL para la API del Banco Mundial
     indicador_codigo = INDICADORES.get(criterio)
-    if not indicador_codigo:
-        return jsonify({"error": "Criterio no válido"}), 400
+
+    if not pais_codigo or not indicador_codigo:
+        return jsonify({"error": "País o criterio no válido"}), 400
 
     url = f"https://api.worldbank.org/v2/country/{pais_codigo}/indicator/{indicador_codigo}?format=json"
 
     response = requests.get(url)
-    
-    if response.status_code != 200:
-        return jsonify({"error": "No se pudieron obtener datos"}), 500
-
     data = response.json()
-    
-    # Extraer el valor más reciente disponible
-    if len(data) > 1 and "value" in data[1][0]:
-        resultado = data[1][0]["value"]
+
+    # Verificar si hay datos disponibles y filtrar valores no nulos
+    if len(data) > 1 and isinstance(data[1], list) and len(data[1]) > 0:
+        ultimo_dato = next((x for x in data[1] if x.get("value") is not None), None)
+        resultado = ultimo_dato["value"] if ultimo_dato else "Datos no disponibles"
     else:
         resultado = "Datos no disponibles"
-
-    resultado_comparar = None
-    if comparar:
-        pais_codigo_comparar = PAISES_CODIGOS.get(comparar)
-        if not pais_codigo_comparar or pais_codigo_comparar == pais_codigo:
-            return jsonify({"error": "País inválido para comparar"}), 400
-        
-        url_comparar = f"https://api.worldbank.org/v2/country/{pais_codigo_comparar}/indicator/{indicador_codigo}?format=json"
-        response_comparar = requests.get(url_comparar)
-        data_comparar = response_comparar.json()
-        
-        if len(data_comparar) > 1 and "value" in data_comparar[1][0]:
-            resultado_comparar = data_comparar[1][0]["value"]
-        else:
-            resultado_comparar = "Datos no disponibles"
 
     return jsonify({
         "pais": pais,
         "criterio": criterio,
-        "valor": resultado,
-        "comparar": comparar if comparar else None,
-        "valor_comparar": resultado_comparar if comparar else None
+        "valor": resultado
     })
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
