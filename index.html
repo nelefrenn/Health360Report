@@ -29,18 +29,40 @@
 
                 let tabla = `<table>
                     <thead>
-                        <tr><th>País</th><th>Criterio</th><th>Valor</th><th>Explicación</th><th>Fecha</th><th>Fuente</th></tr>
+                        <tr>
+                            <th>País</th>
+                            <th>Criterio</th>
+                            <th>Descripción</th>
+                            <th>Valor</th>
+                            <th>Fuente</th>
+                            <th>Fecha</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        <tr><td>${data.pais}</td><td>${data.criterio}</td><td>${data.valor}</td><td>${data.explicacion}</td><td>${data.fecha}</td><td>${data.fuente}</td></tr>`;
+                        <tr>
+                            <td>${data.pais}</td>
+                            <td>${data.criterio}</td>
+                            <td>${data.descripcion}</td>
+                            <td>${data.valor !== null ? data.valor : "No disponible"}</td>
+                            <td>${data.fuente}</td>
+                            <td>${data.fecha}</td>
+                        </tr>`;
 
                 if (comparar) {
-                    tabla += `<tr><td>${data.comparar}</td><td>${data.criterio}</td><td>${data.valor_comparar}</td><td>${data.explicacion}</td><td>${data.fecha_comparar}</td><td>${data.fuente}</td></tr>`;
+                    tabla += `<tr>
+                        <td>${data.comparar}</td>
+                        <td>${data.criterio}</td>
+                        <td>${data.descripcion}</td>
+                        <td>${data.valor_comparar !== null ? data.valor_comparar : "No disponible"}</td>
+                        <td>${data.fuente}</td>
+                        <td>${data.fecha}</td>
+                    </tr>`;
                 }
 
                 tabla += "</tbody></table>";
                 document.getElementById("tabla_resultado").innerHTML = tabla;
             } catch (error) {
+                document.getElementById("tabla_resultado").innerHTML = `<p>Error al cargar datos.</p>`;
                 console.error("Error:", error);
             }
         }
@@ -54,6 +76,7 @@
     </main>
 </body>
 </html>
+
 
 
 
