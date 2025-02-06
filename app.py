@@ -4,9 +4,9 @@ import requests
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Habilita CORS para evitar bloqueos en GitHub Pages
+CORS(app)  # Habilita CORS para evitar bloqueos
 
-# Diccionario con códigos de los países según la API del Banco Mundial
+# Códigos de países
 PAISES_CODIGOS = {
     "Colombia": "COL",
     "Estados Unidos": "USA",
@@ -21,7 +21,7 @@ PAISES_CODIGOS = {
     "Arabia Saudita": "SAU"
 }
 
-# Diccionario con indicadores de salud y su descripción
+# Indicadores con descripción
 INDICADORES = {
     "Accesibilidad y Cobertura del Sistema de Salud": {
         "codigo": "SH.UHC.SRVS.CV.XD",
@@ -30,26 +30,6 @@ INDICADORES = {
     "Financiamiento y Gasto en Salud": {
         "codigo": "SH.XPD.CHEX.GD.ZS",
         "descripcion": "Porcentaje del PIB que se gasta en salud en cada país."
-    },
-    "Calidad de la Atención Médica": {
-        "codigo": "SH.STA.BRTC.ZS",
-        "descripcion": "Mortalidad materna y atención a nacimientos por personal capacitado."
-    },
-    "Resultados en Salud": {
-        "codigo": "SP.DYN.LE00.IN",
-        "descripcion": "Esperanza de vida al nacer."
-    },
-    "Sostenibilidad y Eficiencia del Sistema": {
-        "codigo": "SH.MED.BEDS.ZS",
-        "descripcion": "Número de camas de hospital por cada 1,000 habitantes."
-    },
-    "Innovación y Desarrollo Tecnológico": {
-        "codigo": "IT.NET.USER.ZS",
-        "descripcion": "Porcentaje de la población que usa internet, como indicador de acceso a tecnología."
-    },
-    "Regulación y Gobernanza del Sistema": {
-        "codigo": "SH.ANM.ALL.ZS",
-        "descripcion": "Cobertura de inmunización contra enfermedades clave en la infancia."
     }
 }
 
@@ -79,9 +59,11 @@ def get_data():
     data = response.json()
 
     resultado = "Datos no disponibles"
-    if len(data) > 1 and isinstance(data[1], list) and len(data[1]) > 0:
-        ultimo_dato = next((x for x in data[1] if x.get("value") is not None), None)
-        resultado = ultimo_dato["value"] if ultimo_dato else "Datos no disponibles"
+    if len(data) > 1 and isinstance(data[1], list):
+        for item in data[1]:
+            if item.get("value") is not None:
+                resultado = item["value"]
+                break
 
     resultado_comparar = "Datos no disponibles"
     if comparar:
@@ -91,9 +73,11 @@ def get_data():
             response_comparar = requests.get(url_comparar)
             data_comparar = response_comparar.json()
 
-            if len(data_comparar) > 1 and isinstance(data_comparar[1], list) and len(data_comparar[1]) > 0:
-                ultimo_dato_comparar = next((x for x in data_comparar[1] if x.get("value") is not None), None)
-                resultado_comparar = ultimo_dato_comparar["value"] if ultimo_dato_comparar else "Datos no disponibles"
+            if len(data_comparar) > 1 and isinstance(data_comparar[1], list):
+                for item in data_comparar[1]:
+                    if item.get("value") is not None:
+                        resultado_comparar = item["value"]
+                        break
 
     return jsonify({
         "pais": pais,
@@ -108,6 +92,7 @@ def get_data():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
