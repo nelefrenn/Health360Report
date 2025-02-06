@@ -8,6 +8,7 @@
     <script>
         async function fetchData() {
             const pais = document.getElementById("pais").value;
+            const comparar = document.getElementById("comparar").checked ? document.getElementById("pais_comparar").value : "";
             const criterio = document.getElementById("criterio").value;
 
             if (!pais || !criterio) {
@@ -16,6 +17,9 @@
             }
 
             let url = `https://health360report.onrender.com/get_data?pais=${encodeURIComponent(pais)}&criterio=${encodeURIComponent(criterio)}`;
+            if (comparar) {
+                url += `&comparar=${encodeURIComponent(comparar)}`;
+            }
 
             try {
                 const response = await fetch(url);
@@ -23,18 +27,18 @@
 
                 const data = await response.json();
 
-                // Si el valor es null, mostrar "No disponible"
-                let valor = data.valor !== null ? data.valor : "No disponible";
-
                 let tabla = `<table>
                     <thead>
                         <tr><th>País</th><th>Criterio</th><th>Valor</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>${data.pais}</td><td>${data.criterio}</td><td>${valor}</td></tr>
-                    </tbody>
-                </table>`;
+                        <tr><td>${data.pais}</td><td>${data.criterio}</td><td>${data.valor !== null ? data.valor : "No disponible"}</td></tr>`;
 
+                if (comparar) {
+                    tabla += `<tr><td>${data.comparar}</td><td>${data.criterio}</td><td>${data.valor_comparar !== null ? data.valor_comparar : "No disponible"}</td></tr>`;
+                }
+
+                tabla += "</tbody></table>";
                 document.getElementById("tabla_resultado").innerHTML = tabla;
             } catch (error) {
                 document.getElementById("tabla_resultado").innerHTML = `<p>Error al cargar datos.</p>`;
@@ -62,21 +66,35 @@
             <option>Arabia Saudita</option>
         </select>
 
+        <label><input type="checkbox" id="comparar"> Comparar</label>
+        <select id="pais_comparar">
+            <option>Colombia</option>
+            <option>Estados Unidos</option>
+            <option>Venezuela</option>
+            <option>México</option>
+            <option>Perú</option>
+            <option>Brasil</option>
+            <option>España</option>
+            <option>Puerto Rico</option>
+            <option>República Dominicana</option>
+            <option>Filipinas</option>
+            <option>Arabia Saudita</option>
+        </select>
+
         <label>Selecciona un criterio:</label>
         <select id="criterio">
             <option>Accesibilidad y Cobertura del Sistema de Salud</option>
             <option>Financiamiento y Gasto en Salud</option>
             <option>Calidad de la Atención Médica</option>
-            <option>Resultados en Salud</option>
-            <option>Sostenibilidad y Eficiencia del Sistema</option>
-            <option>Innovación y Desarrollo Tecnológico</option>
-            <option>Regulación y Gobernanza del Sistema</option>
         </select>
 
         <button onclick="fetchData()">Buscar</button>
 
         <div id="tabla_resultado"></div>
     </main>
+</body>
+</html>
+
 </body>
 </html>
 
