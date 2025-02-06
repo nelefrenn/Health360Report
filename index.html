@@ -54,50 +54,8 @@
                 if (comparar) {
                     tabla += `<tr>
                         <td>${data.comparar}</td>
-                        <td>${data.criterio}</td>
-                        <td>${data.descripcion}</td>
-                        <td>${valor_comparar}</td>
-                        <td>${data.fuente}</td>
-                        <td>${data.fecha}</td>
-                    </tr>`;
-                }
+                        <td
 
-                tabla += "</tbody></table>";
-                document.getElementById("tabla_resultado").innerHTML = tabla;
-            } catch (error) {
-                document.getElementById("tabla_resultado").innerHTML = `<p>Error al cargar datos.</p>`;
-                console.error("Error:", error);
-            }
-        }
-    </script>
-</head>
-<body>
-    <main class="container">
-        <h1>Salud360 Report</h1>
-        <label>Selecciona un país:</label>
-        <select id="pais">
-            <option>Colombia</option>
-            <option>Estados Unidos</option>
-        </select>
-
-        <label><input type="checkbox" id="comparar"> Comparar</label>
-        <select id="pais_comparar">
-            <option>Colombia</option>
-            <option>Estados Unidos</option>
-        </select>
-
-        <label>Selecciona un criterio:</label>
-        <select id="criterio">
-            <option>Accesibilidad y Cobertura del Sistema de Salud</option>
-            <option>Financiamiento y Gasto en Salud</option>
-        </select>
-
-        <button onclick="fetchData()">Buscar</button>
-
-        <div id="tabla_resultado"></div>
-    </main>
-</body>
-</html>
 
 
 
